@@ -1,0 +1,321 @@
+const form = document.getElementById("registrationForm");
+
+const dob = document.getElementById("dob");
+const age = document.getElementById("age");
+
+const passport = document.getElementById("passport");
+const previewImage = document.getElementById("previewImage");
+
+const password = document.getElementById("password");
+const confirmPassword = document.getElementById("confirmPassword");
+
+const message = document.getElementById("message");
+
+const studentResult = document.getElementById("studentResult");
+const resultImage = document.getElementById("resultImage");
+
+
+// ===============================
+// CALCULATE AGE
+// ===============================
+
+dob.addEventListener("change", function () {
+
+    if (!dob.value) {
+        age.value = "";
+        return;
+    }
+
+    const birthDate = new Date(dob.value);
+    const today = new Date();
+
+    let calculatedAge =
+        today.getFullYear() - birthDate.getFullYear();
+
+    const monthDifference =
+        today.getMonth() - birthDate.getMonth();
+
+    if (
+        monthDifference < 0 ||
+        (
+            monthDifference === 0 &&
+            today.getDate() < birthDate.getDate()
+        )
+    ) {
+        calculatedAge--;
+    }
+
+    // Prevent future dates
+    if (calculatedAge < 0) {
+        age.value = "";
+        message.textContent = "Date of birth cannot be in the future.";
+        message.className = "error";
+        return;
+    }
+
+    age.value = calculatedAge;
+});
+
+
+// ===============================
+// PASSPORT PREVIEW
+// ===============================
+
+passport.addEventListener("change", function () {
+
+    const file = passport.files[0];
+
+    if (!file) {
+        previewImage.src = "";
+        previewImage.style.display = "none";
+        return;
+    }
+
+    // Check that selected file is an image
+    if (!file.type.startsWith("image/")) {
+
+        message.textContent =
+            "Please select a valid image file.";
+
+        message.className = "error";
+
+        passport.value = "";
+        previewImage.src = "";
+        previewImage.style.display = "none";
+
+        return;
+    }
+
+    const reader = new FileReader();
+
+    reader.onload = function (event) {
+
+        previewImage.src = event.target.result;
+        previewImage.style.display = "block";
+
+        message.textContent = "";
+        message.className = "";
+    };
+
+    reader.readAsDataURL(file);
+});
+
+
+// ===============================
+// FORM SUBMISSION
+// ===============================
+
+form.addEventListener("submit", function (event) {
+
+    event.preventDefault();
+
+    // Clear previous message
+    message.textContent = "";
+    message.className = "";
+
+
+    // ===============================
+    // GET FORM VALUES
+    // ===============================
+
+    const studentId =
+        document.getElementById("studentId").value.trim();
+
+    const firstName =
+        document.getElementById("firstName").value.trim();
+
+    const lastName =
+        document.getElementById("lastName").value.trim();
+
+    const email =
+        document.getElementById("email").value.trim();
+
+    const phone =
+        document.getElementById("phone").value.trim();
+
+    const gender =
+        document.getElementById("gender").value;
+
+    const department =
+        document.getElementById("department").value;
+
+    const level =
+        document.getElementById("level").value;
+
+
+    // ===============================
+    // CHECK DATE OF BIRTH
+    // ===============================
+
+    if (!dob.value || age.value === "") {
+
+        message.textContent =
+            "Please enter a valid date of birth.";
+
+        message.className = "error";
+
+        return;
+    }
+
+
+    // ===============================
+    // PASSWORD VALIDATION
+    // ===============================
+
+    if (password.value.length < 6) {
+
+        message.textContent =
+            "Password must contain at least 6 characters.";
+
+        message.className = "error";
+
+        password.focus();
+
+        return;
+    }
+
+
+    if (password.value !== confirmPassword.value) {
+
+        message.textContent =
+            "Passwords do not match.";
+
+        message.className = "error";
+
+        confirmPassword.focus();
+
+        return;
+    }
+
+
+    // ===============================
+    // PHONE VALIDATION
+    // ===============================
+
+    const phonePattern = /^[0-9]{11}$/;
+
+    if (!phonePattern.test(phone)) {
+
+        message.textContent =
+            "Enter a valid 11-digit Nigerian phone number.";
+
+        message.className = "error";
+
+        document.getElementById("phone").focus();
+
+        return;
+    }
+
+
+    // ===============================
+    // PASSPORT VALIDATION
+    // ===============================
+
+    if (!passport.files.length) {
+
+        message.textContent =
+            "Please upload a passport photograph.";
+
+        message.className = "error";
+
+        passport.focus();
+
+        return;
+    }
+
+
+    // ===============================
+    // SUCCESS MESSAGE
+    // ===============================
+
+    message.textContent =
+        "Registration completed successfully!";
+
+    message.className = "";
+
+
+    // ===============================
+    // DISPLAY STUDENT INFORMATION
+    // ===============================
+
+    document.getElementById("resultId").textContent =
+        studentId;
+
+    document.getElementById("resultName").textContent =
+        firstName + " " + lastName;
+
+    document.getElementById("resultEmail").textContent =
+        email;
+
+    document.getElementById("resultPhone").textContent =
+        phone;
+
+    document.getElementById("resultAge").textContent =
+        age.value;
+
+    document.getElementById("resultGender").textContent =
+        gender;
+
+    document.getElementById("resultDepartment").textContent =
+        department;
+
+    document.getElementById("resultLevel").textContent =
+        level;
+
+
+    // ===============================
+    // DISPLAY PASSPORT
+    // ===============================
+
+    if (previewImage.src) {
+
+        resultImage.src = previewImage.src;
+        resultImage.style.display = "block";
+
+    }
+
+
+    // ===============================
+    // SHOW RESULT
+    // ===============================
+
+    studentResult.style.display = "block";
+
+
+    // ===============================
+    // SCROLL TO RESULT
+    // ===============================
+
+    studentResult.scrollIntoView({
+        behavior: "smooth",
+        block: "start"
+    });
+
+});
+
+
+// ===============================
+// RESET FORM
+// ===============================
+
+form.addEventListener("reset", function () {
+
+    // Wait for browser reset to finish
+    setTimeout(function () {
+
+        message.textContent = "";
+        message.className = "";
+
+        age.value = "";
+
+        previewImage.src = "";
+        previewImage.style.display = "none";
+
+        resultImage.src = "";
+        resultImage.style.display = "none";
+
+        studentResult.style.display = "none";
+
+    }, 0);
+
+});
